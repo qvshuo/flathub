@@ -1,0 +1,45 @@
+app-id: com.jianguoyun.Nutstore
+runtime: org.gnome.Platform
+runtime-version: '41'
+sdk: org.gnome.Sdk
+separate-locales: false
+command: nutstore.sh
+
+finish-args:
+- --share=network
+- --share=ipc
+- --socket=x11
+- --device=dri
+- --filesystem=home/'Nutstore Files':create
+- --talk-name=org.freedesktop.Notifications
+- --talk-name=org.kde.StatusNotifierWatcher
+
+modules:
+  - name: Nutstore
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 apply_extra /app/bin/
+      - install -Dm755 nutstore.sh /app/bin/
+      - install -Dm644 com.jianguoyun.Nutstore.desktop /app/share/applications/com.jianguoyun.Nutstore.desktop
+      - install -Dm644 /app/extra/nutstore/app-icon/nutstore.png /app/share/icons/hicolor/512x512/apps/com.jianguoyun.Nutstore.png
+
+    sources:
+      - type: extra-data
+        filename: nutstore_client.tar.gz
+        url: https://www.jianguoyun.com/static/exe/ex/5.1.2/nutstore_client-5.1.2-linux-x64-public.tar.gz
+        sha256: a79b61b348189801b3ded166294c869c694ece715d145b17ec97f960e91eb85a
+        size: 42867736
+
+      - type: script
+        commands:
+            - mkdir nutstore
+            - tar zxvf nutstore_client.tar.gz -C nutstore
+        dest-filename: apply_extra
+
+      - type: script
+        commands:
+          - exec /app/extra/nutstore/bin/nutstore-pydaemon.py "$@"
+        dest-filename: nutstore.sh
+
+      - type: file
+        path: com.jianguoyun.Nutstore.desktop
